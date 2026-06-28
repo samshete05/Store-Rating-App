@@ -12,10 +12,10 @@ router.post(
   requireAuth,
   requireRoles("normal_user"),
   asyncHandler(async (req, res) => {
-    const { storeId, rating } = req.body;
+    const { storeId, rating, feedback } = req.body;
     const store = await getStoreById(storeId);
     if (!store) return res.status(404).json({ message: "Store not found." });
-    const result = await submitRating({ userId: req.auth.sub, storeId, rating });
+    const result = await submitRating({ userId: req.auth.sub, storeId, rating, feedback });
     res.status(201).json({ rating: result });
   })
 );

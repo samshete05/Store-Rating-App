@@ -5,6 +5,7 @@ import { averageRating, normalizeEmail, uid } from "../utils/helpers";
 import {
   validateAddress,
   validateEmail,
+  validateFeedback,
   validateName,
   validatePassword,
   validateRating,
@@ -190,9 +191,14 @@ export function AppProvider({ children }) {
     );
   };
 
-  const submitRating = ({ userId, storeId, rating }) => {
+  const submitRating = ({ userId, storeId, rating, feedback = "" }) => {
     const error = validateRating(rating);
     if (error) throw new Error(error);
+
+    const feedbackError = validateFeedback(feedback);
+    if (feedbackError) throw new Error(feedbackError);
+
+    const normalizedFeedback = String(feedback || "").trim();
 
     setRatings((current) => {
       const existing = current.find(
@@ -201,7 +207,12 @@ export function AppProvider({ children }) {
       if (existing) {
         return current.map((entry) =>
           entry.id === existing.id
-            ? { ...entry, rating: Number(rating), updatedAt: new Date().toISOString() }
+            ? {
+                ...entry,
+                rating: Number(rating),
+                feedback: normalizedFeedback,
+                updatedAt: new Date().toISOString(),
+              }
             : entry
         );
       }
@@ -212,6 +223,7 @@ export function AppProvider({ children }) {
           userId,
           storeId,
           rating: Number(rating),
+          feedback: normalizedFeedback,
           updatedAt: new Date().toISOString(),
         },
       ];

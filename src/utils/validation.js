@@ -47,3 +47,9 @@ export function validateRating(rating) {
   }
   return "";
 }
+
+export function validateFeedback(feedback) {
+  const value = String(feedback || "").trim();
+  if (value.length > 500) return "Feedback must be at most 500 characters.";
+  return "";
+}

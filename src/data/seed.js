@@ -64,6 +64,7 @@ export const seedRatings = [
     userId: "user-normal-1",
     storeId: "store-1",
     rating: 5,
+    feedback: "Clean service, quick checkout, and helpful staff.",
     updatedAt: "2026-06-24T10:20:00.000Z",
   },
   {
@@ -71,6 +72,7 @@ export const seedRatings = [
     userId: "user-normal-2",
     storeId: "store-1",
     rating: 4,
+    feedback: "Good experience overall, but the evening queue can be long.",
     updatedAt: "2026-06-25T08:15:00.000Z",
   },
   {
@@ -78,6 +80,7 @@ export const seedRatings = [
     userId: "user-normal-1",
     storeId: "store-2",
     rating: 3,
+    feedback: "Average selection, but the store is well maintained.",
     updatedAt: "2026-06-23T14:40:00.000Z",
   },
 ];

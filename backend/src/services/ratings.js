@@ -1,17 +1,22 @@
 const { pool } = require("../config/db");
-const { validateRating } = require("../utils/validation");
+const { validateFeedback, validateRating } = require("../utils/validation");
 
-async function submitRating({ userId, storeId, rating }) {
+async function submitRating({ userId, storeId, rating, feedback = "" }) {
   const error = validateRating(rating);
   if (error) throw new Error(error);
 
+  const feedbackError = validateFeedback(feedback);
+  if (feedbackError) throw new Error(feedbackError);
+
+  const normalizedFeedback = String(feedback || "").trim();
+
   const result = await pool.query(
-    `insert into ratings (user_id, store_id, rating)
-     values ($1, $2, $3)
+    `insert into ratings (user_id, store_id, rating, feedback)
+     values ($1, $2, $3, $4)
      on conflict (user_id, store_id)
-     do update set rating = excluded.rating, updated_at = now()
+     do update set rating = excluded.rating, feedback = excluded.feedback, updated_at = now()
      returning *`,
-    [userId, storeId, Number(rating)]
+    [userId, storeId, Number(rating), normalizedFeedback]
   );
   return result.rows[0];
 }

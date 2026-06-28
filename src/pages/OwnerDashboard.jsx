@@ -32,7 +32,8 @@ export default function OwnerDashboard() {
         return (
           rating.user?.name.toLowerCase().includes(search) ||
           rating.user?.email.toLowerCase().includes(search) ||
-          rating.store?.name.toLowerCase().includes(search)
+          rating.store?.name.toLowerCase().includes(search) ||
+          (rating.feedback || "").toLowerCase().includes(search)
         );
       });
   }, [ownedStores, query, ratings, stores, users]);
@@ -130,7 +131,7 @@ export default function OwnerDashboard() {
         <Card>
           <div className="app-title text-2xl font-bold text-slate-900">Ratings on your stores</div>
           <p className="mt-2 text-sm text-slate-600">
-            Search customer reviews and see the latest submissions.
+            Search customer reviews, including written feedback, and see the latest submissions.
           </p>
           <div className="mt-5">
             <Field
@@ -151,6 +152,13 @@ export default function OwnerDashboard() {
                       </div>
                       <div className="mt-1 text-xs text-slate-500">{rating.user?.email}</div>
                       <div className="mt-1 text-xs text-slate-500">{rating.store?.name}</div>
+                      {rating.feedback ? (
+                        <p className="mt-3 max-w-xl rounded-2xl bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                          {rating.feedback}
+                        </p>
+                      ) : (
+                        <p className="mt-3 text-xs italic text-slate-400">No written feedback.</p>
+                      )}
                     </div>
                     <div className="text-right">
                       <RatingPill value={rating.rating} />

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/Button";
 import Card from "../components/Card";
+import { Field, TextAreaField } from "../components/Field";
 import PageShell from "../components/PageShell";
-import { Field } from "../components/Field";
 import StatsGrid from "../components/StatsGrid";
 import { RatingPill } from "../components/SortableTable";
 import { useApp } from "../context/AppContext";
 import { averageRating, formatRating, getSubmittedRating, ratingCount } from "../utils/helpers";
-import { validatePassword, validateRating } from "../utils/validation";
+import { validateFeedback, validatePassword, validateRating } from "../utils/validation";
 
 export default function UserDashboard() {
   const {
@@ -20,7 +20,7 @@ export default function UserDashboard() {
     getStoreAverage,
   } = useApp();
   const [search, setSearch] = useState("");
-  const [draftRatings, setDraftRatings] = useState({});
+  const [draftReviews, setDraftReviews] = useState({});
   const [passwordForm, setPasswordForm] = useState({ password: "", confirm: "" });
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -32,10 +32,13 @@ export default function UserDashboard() {
     stores.forEach((store) => {
       const existing = getSubmittedRating(ratings, currentUser.id, store.id);
       if (existing) {
-        nextDrafts[store.id] = String(existing.rating);
+        nextDrafts[store.id] = {
+          rating: String(existing.rating),
+          feedback: existing.feedback || "",
+        };
       }
     });
-    setDraftRatings(nextDrafts);
+    setDraftReviews(nextDrafts);
   }, [currentUser.id, ratings, stores]);
 
   const filteredStores = useMemo(() => {
@@ -74,16 +77,23 @@ export default function UserDashboard() {
   const handleSubmitRating = (storeId) => {
     setError("");
     setNotice("");
-    const value = draftRatings[storeId];
+    const value = draftReviews[storeId]?.rating;
+    const feedback = draftReviews[storeId]?.feedback || "";
     const validationError = validateRating(value);
     if (validationError) {
       setError(validationError);
       return;
     }
 
+    const feedbackError = validateFeedback(feedback);
+    if (feedbackError) {
+      setError(feedbackError);
+      return;
+    }
+
     try {
-      submitRating({ userId: currentUser.id, storeId, rating: Number(value) });
-      setNotice("Rating saved.");
+      submitRating({ userId: currentUser.id, storeId, rating: Number(value), feedback });
+      setNotice("Review saved.");
     } catch (err) {
       setError(err.message);
     }
@@ -112,7 +122,7 @@ export default function UserDashboard() {
     <PageShell
       user={currentUser}
       title="User store ratings"
-      subtitle="Search stores by name or address, submit a new rating, or update an existing one in place."
+      subtitle="Search stores by name or address, submit a rating and feedback, or update either one in place."
       navItems={[
         { to: "/user", label: "Stores" },
         { to: "/user#password", label: "Password" },
@@ -172,29 +182,59 @@ export default function UserDashboard() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                <label className="block">
-                  <span className="text-sm font-medium text-slate-700">Submit or modify rating</span>
-                  <select
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                    value={draftRatings[store.id] || ""}
+                <div className="grid gap-4 md:grid-cols-2 md:col-span-1">
+                  <label className="block">
+                    <span className="text-sm font-medium text-slate-700">Submit or modify rating</span>
+                    <select
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                      value={draftReviews[store.id]?.rating || ""}
+                      onChange={(event) =>
+                        setDraftReviews({
+                          ...draftReviews,
+                          [store.id]: {
+                            ...(draftReviews[store.id] || {}),
+                            rating: event.target.value,
+                          },
+                        })
+                      }
+                    >
+                      <option value="">Choose rating</option>
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <option key={value} value={value}>
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <TextAreaField
+                    label="Feedback"
+                    rows={4}
+                    value={draftReviews[store.id]?.feedback || ""}
                     onChange={(event) =>
-                      setDraftRatings({ ...draftRatings, [store.id]: event.target.value })
+                      setDraftReviews({
+                        ...draftReviews,
+                        [store.id]: {
+                          ...(draftReviews[store.id] || {}),
+                          feedback: event.target.value,
+                        },
+                      })
                     }
-                  >
-                    <option value="">Choose rating</option>
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    hint="Write what stood out, what could be better, or anything you want the owner to know."
+                  />
+                </div>
                 <div className="flex items-end">
                   <Button onClick={() => handleSubmitRating(store.id)}>
-                    {submitted ? "Update rating" : "Submit rating"}
+                    {submitted ? "Update review" : "Submit review"}
                   </Button>
                 </div>
               </div>
+
+              {submitted?.feedback ? (
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Your feedback</div>
+                  <p className="mt-2 leading-6">{submitted.feedback}</p>
+                </div>
+              ) : null}
             </Card>
           );
         })}

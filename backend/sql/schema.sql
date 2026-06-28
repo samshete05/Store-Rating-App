@@ -39,10 +39,14 @@ create table if not exists ratings (
   user_id uuid not null references users(id) on delete cascade,
   store_id uuid not null references stores(id) on delete cascade,
   rating integer not null check (rating between 1 and 5),
+  feedback varchar(500) not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (user_id, store_id)
 );
+
+alter table if exists ratings
+  add column if not exists feedback varchar(500) not null default '';
 
 create index if not exists idx_users_role on users(role);
 create index if not exists idx_users_email on users(email);
