@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Card from "../components/Card";
-import { Field } from "../components/Field";
+import { Alert, Button, Card, Col, Container, Form, Row, Spinner, Stack } from "react-bootstrap";
 import { useApp } from "../context/AppContext";
 import { getHomePath } from "./routeHelpers";
 
@@ -36,56 +34,72 @@ export default function Login() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md">
-        <Card className="p-5">
-          <div className="app-title text-lg font-bold text-[var(--ink)]">Welcome back</div>
- 
-
-          <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-            <Field
-              label="Email"
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm({ ...form, email: event.target.value })}
-              placeholder="admin@storegrid.com"
-              required
-            />
-            <Field
-              label="Password"
-              type="password"
-              value={form.password}
-              onChange={(event) => setForm({ ...form, password: event.target.value })}
-              placeholder="Admin@1234"
-              required
-            />
-            {error ? (
-              <div className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
-                {error}
+    <Container className="min-vh-100 d-flex align-items-center py-5">
+      <Row className="w-100 justify-content-center">
+        <Col xs={12} md={10} lg={6} xl={5}>
+          <Card className="border-0 shadow-lg">
+            <Card.Body className="p-4 p-md-5">
+              <div className="mb-4">
+                <div className="text-uppercase small fw-semibold text-secondary" style={{ letterSpacing: "0.22em" }}>
+                  Sign in
+                </div>
+                <h1 className="app-title mt-2 mb-2 fw-bold">Welcome back</h1>
+                <p className="text-secondary mb-0">Use your registered email and password to continue.</p>
               </div>
-            ) : null}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
 
-          <div className="mt-4 rounded-2xl bg-[#f5ecdf] px-3 py-3 text-xs text-[#6f614e]">
-            Need an account?{" "}
-            <Link to="/register" className="text-xs font-semibold text-[#b44e2c] hover:text-[#913a1d]">
-              Register here
-            </Link>
-          </div>
+              <Form onSubmit={handleSubmit}>
+                <Stack gap={3}>
+                  <Form.Group controlId="loginEmail">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => setForm({ ...form, email: event.target.value })}
+                      placeholder="admin@storegrid.com"
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="loginPassword">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      value={form.password}
+                      onChange={(event) => setForm({ ...form, password: event.target.value })}
+                      placeholder="Admin@1234"
+                      required
+                    />
+                  </Form.Group>
+                  {error ? <Alert variant="danger" className="mb-0">{error}</Alert> : null}
+                  <Button type="submit" variant="dark" className="w-100" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
+                </Stack>
+              </Form>
 
-          <div className="mt-4 rounded-2xl border border-dashed border-[#dbcdb8] px-3 py-3 text-xs text-[#6f614e]">
-            Dummy logins:
-            <div className="mt-2 space-y-1 text-[10px] text-[#8a7c67]">
-              <div>Admin: admin@storegrid.com / Admin@1234</div>
-              <div>Owner: owner@storegrid.com / Owner@1234</div>
-              <div>User: user@storegrid.com / User@1234</div>
-            </div>
-          </div>
-        </Card>
-      </div>
-    </div>
+              <div className="mt-4 rounded-3 border bg-light p-3 text-secondary">
+                Need an account?{" "}
+                <Link to="/register" className="fw-semibold text-decoration-none">
+                  Register here
+                </Link>
+              </div>
+
+              <Alert variant="info" className="mt-4 mb-0">
+                <div className="fw-semibold mb-2">Demo credentials</div>
+                <div className="small">Admin: admin@storegrid.com / Admin@1234</div>
+                <div className="small">Owner: owner@storegrid.com / Owner@1234</div>
+                <div className="small">User: user@storegrid.com / User@1234</div>
+              </Alert>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 }

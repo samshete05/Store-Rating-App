@@ -1,11 +1,6 @@
 import React, { useMemo, useState } from "react";
-import Button from "../components/Button";
-import Card from "../components/Card";
-import Modal from "../components/Modal";
-import PageShell from "../components/PageShell";
-import { Field } from "../components/Field";
-import StatsGrid from "../components/StatsGrid";
-import SortableTable, { RatingPill } from "../components/SortableTable";
+import { Link } from "react-router-dom";
+import { Alert, Badge, Button, Card, Col, Container, Form, Modal, Nav, Navbar, Row, Table } from "react-bootstrap";
 import { useApp } from "../context/AppContext";
 import {
   averageRating,
@@ -14,7 +9,13 @@ import {
   ratingCount,
   sortByField,
 } from "../utils/helpers";
-import { validateAddress, validateEmail, validateName, validatePassword, validateStoreName } from "../utils/validation";
+import {
+  validateAddress,
+  validateEmail,
+  validateName,
+  validatePassword,
+  validateStoreName,
+} from "../utils/validation";
 
 const defaultUserForm = {
   name: "",
@@ -77,11 +78,13 @@ export default function AdminDashboard() {
         formatRole(user.role).toLowerCase().includes(query)
       );
     });
+
     return sortByField(rows, userSort.key, userSort.direction, (user) => {
       if (userSort.key === "rating") {
         const store = stores.find((entry) => entry.id === user.storeId);
         return store ? averageRating(ratings, store.id) : 0;
       }
+
       return user[userSort.key] || "";
     });
   }, [ratings, stores, userQuery, userSort.direction, userSort.key, users]);
@@ -96,12 +99,14 @@ export default function AdminDashboard() {
         store.address.toLowerCase().includes(query)
       );
     });
+
     return sortByField(rows, storeSort.key, storeSort.direction, (store) => {
       if (storeSort.key === "rating") return averageRating(ratings, store.id);
       if (storeSort.key === "owner") {
         const owner = users.find((user) => user.id === store.ownerId);
         return owner ? owner.name : "";
       }
+
       return store[storeSort.key] || "";
     });
   }, [ratings, storeQuery, storeSort.direction, storeSort.key, stores, users]);
@@ -117,6 +122,7 @@ export default function AdminDashboard() {
       if (userForm.role === "store_owner" && !userForm.storeId) {
         throw new Error("Choose a store to assign to the store owner.");
       }
+
       addUser(userForm);
       setUserForm(defaultUserForm);
       setNotice("User created successfully.");
@@ -146,7 +152,7 @@ export default function AdminDashboard() {
 
     if (passwordForm.password !== passwordForm.confirm) {
       setPasswordError("Passwords do not match.");
-      return;
+      return;  
     }
 
     try {
@@ -168,7 +174,8 @@ export default function AdminDashboard() {
       label: "Rating",
       sortable: true,
       render: (row) => {
-        if (row.role !== "store_owner") return <span className="text-slate-400">-</span>;
+        if (row.role !== "store_owner") return <span className="text-secondary">-</span>;
+
         const store = stores.find((entry) => entry.id === row.storeId);
         return <RatingPill value={store ? averageRating(ratings, store.id) : 0} />;
       },
@@ -197,8 +204,8 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <PageShell
-      user={currentUser}
+    <DashboardShell
+      currentUser={currentUser}
       title="Admin overview"
       subtitle="Create users and stores, search every list, sort key fields, and inspect any record in detail."
       navItems={[
@@ -208,155 +215,190 @@ export default function AdminDashboard() {
       ]}
       onLogout={logout}
     >
-      {notice ? (
-        <Card className="border-emerald-200 bg-emerald-50 text-emerald-800">{notice}</Card>
-      ) : null}
+      {notice ? <Alert variant="success">{notice}</Alert> : null}
 
       <StatsGrid items={stats} />
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Card>
-          <div className="app-title text-2xl font-bold text-slate-900">Add a store</div>
-          <p className="mt-2 text-sm text-slate-600">
-            Create a new store and optionally assign a store owner.
-          </p>
-          <form className="mt-5 space-y-4" onSubmit={handleStoreSubmit}>
-            <Field
-              label="Store Name"
-              value={storeForm.name}
-              onChange={(event) => setStoreForm({ ...storeForm, name: event.target.value })}
-              placeholder="Northwind Groceries"
-              error={storeForm.name ? validateStoreName(storeForm.name) : ""}
-            />
-            <Field
-              label="Store Email"
-              value={storeForm.email}
-              onChange={(event) => setStoreForm({ ...storeForm, email: event.target.value })}
-              placeholder="store@example.com"
-              error={storeForm.email ? validateEmail(storeForm.email) : ""}
-            />
-            <Field
-              label="Address"
-              value={storeForm.address}
-              onChange={(event) => setStoreForm({ ...storeForm, address: event.target.value })}
-              placeholder="Full postal address"
-              error={storeForm.address ? validateAddress(storeForm.address) : ""}
-            />
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Owner</span>
-              <select
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                value={storeForm.ownerId}
-                onChange={(event) => setStoreForm({ ...storeForm, ownerId: event.target.value })}
-              >
-                <option value="">Unassigned</option>
-                {ownerOptions.map((owner) => (
-                  <option key={owner.id} value={owner.id}>
-                    {owner.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {storeError ? (
-              <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                {storeError}
-              </div>
-            ) : null}
-            <Button type="submit">Create store</Button>
-          </form>
-        </Card>
+      <Row className="g-4 mb-4">
+        <Col xs={12} xl={6}>
+          <Card className="h-100 border-0 shadow-sm">
+            <Card.Body className="p-4">
+              <div className="app-title h3 fw-bold mb-2">Add a store</div>
+              <p className="text-secondary mb-4">Create a new store and assign to a store owner.</p>
+              <Form onSubmit={handleStoreSubmit} className="d-grid gap-3">
+                <Form.Group controlId="storeName">
+                  <Form.Label>Store Name</Form.Label>
+                  <Form.Control
+                    value={storeForm.name}
+                    onChange={(event) => setStoreForm({ ...storeForm, name: event.target.value })}
+                    placeholder="Northwind Groceries"
+                    isInvalid={Boolean(storeForm.name && validateStoreName(storeForm.name))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateStoreName(storeForm.name)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="storeEmail">
+                  <Form.Label>Store Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    value={storeForm.email}
+                    onChange={(event) => setStoreForm({ ...storeForm, email: event.target.value })}
+                    placeholder="store@example.com"
+                    isInvalid={Boolean(storeForm.email && validateEmail(storeForm.email))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateEmail(storeForm.email)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="storeAddress">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    value={storeForm.address}
+                    onChange={(event) => setStoreForm({ ...storeForm, address: event.target.value })}
+                    placeholder="Full postal address"
+                    isInvalid={Boolean(storeForm.address && validateAddress(storeForm.address))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateAddress(storeForm.address)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="storeOwnerId">
+                  <Form.Label>Owner</Form.Label>
+                  <Form.Select
+                    value={storeForm.ownerId}
+                    onChange={(event) => setStoreForm({ ...storeForm, ownerId: event.target.value })}
+                  >
+                    <option value="">Unassigned</option>
+                    {ownerOptions.map((owner) => (
+                      <option key={owner.id} value={owner.id}>
+                        {owner.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+                {storeError ? <Alert variant="danger" className="mb-0">{storeError}</Alert> : null}
+                <div>
+                  <Button type="submit" variant="dark">
+                    Create store
+                  </Button>
+                </div>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
 
-        <Card>
-          <div className="app-title text-2xl font-bold text-slate-900">Add a user</div>
-          <p className="mt-2 text-sm text-slate-600">
-            Create a normal user, admin user, or store owner from one form.
-          </p>
-          <form className="mt-5 space-y-4" onSubmit={handleUserSubmit}>
-            <Field
-              label="Name"
-              value={userForm.name}
-              onChange={(event) => setUserForm({ ...userForm, name: event.target.value })}
-              placeholder="Cecilia Alexandra Bennett"
-              error={userForm.name ? validateName(userForm.name) : ""}
-            />
-            <Field
-              label="Email"
-              value={userForm.email}
-              onChange={(event) => setUserForm({ ...userForm, email: event.target.value })}
-              placeholder="user@example.com"
-              error={userForm.email ? validateEmail(userForm.email) : ""}
-            />
-            <Field
-              label="Address"
-              value={userForm.address}
-              onChange={(event) => setUserForm({ ...userForm, address: event.target.value })}
-              placeholder="Address"
-              error={userForm.address ? validateAddress(userForm.address) : ""}
-            />
-            <Field
-              label="Password"
-              type="password"
-              value={userForm.password}
-              onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
-              placeholder="Admin@1234"
-              error={userForm.password ? validatePassword(userForm.password) : ""}
-            />
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Role</span>
-              <select
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                value={userForm.role}
-                onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}
-              >
-                <option value="normal_user">Normal User</option>
-                <option value="admin">Admin</option>
-                <option value="store_owner">Store Owner</option>
-              </select>
-            </label>
-            {userForm.role === "store_owner" ? (
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Assign Store</span>
-                <select
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                  value={userForm.storeId}
-                  onChange={(event) => setUserForm({ ...userForm, storeId: event.target.value })}
-                >
-                  <option value="">Choose a store</option>
-                  {stores.map((store) => (
-                    <option key={store.id} value={store.id}>
-                      {store.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            {userError ? (
-              <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                {userError}
-              </div>
-            ) : null}
-            <Button type="submit">Create user</Button>
-          </form>
-        </Card>
-      </div>
+        <Col xs={12} xl={6}>
+          <Card className="h-100 border-0 shadow-sm">
+            <Card.Body className="p-4">
+              <div className="app-title h3 fw-bold mb-2">Add a user</div>
+              <p className="text-secondary mb-4">Create a normal user, admin user, or store owner from one form.</p>
+              <Form onSubmit={handleUserSubmit} className="d-grid gap-3">
+                <Form.Group controlId="userName">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    value={userForm.name}
+                    onChange={(event) => setUserForm({ ...userForm, name: event.target.value })}
+                    placeholder="Cecilia Alexandra Bennett"
+                    isInvalid={Boolean(userForm.name && validateName(userForm.name))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateName(userForm.name)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="userEmail">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    value={userForm.email}
+                    onChange={(event) => setUserForm({ ...userForm, email: event.target.value })}
+                    placeholder="user@example.com"
+                    isInvalid={Boolean(userForm.email && validateEmail(userForm.email))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateEmail(userForm.email)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="userAddress">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    value={userForm.address}
+                    onChange={(event) => setUserForm({ ...userForm, address: event.target.value })}
+                    placeholder="Address"
+                    isInvalid={Boolean(userForm.address && validateAddress(userForm.address))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validateAddress(userForm.address)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="userPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={userForm.password}
+                    onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
+                    placeholder="Admin@1234"
+                    isInvalid={Boolean(userForm.password && validatePassword(userForm.password))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validatePassword(userForm.password)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="userRole">
+                  <Form.Label>Role</Form.Label>
+                  <Form.Select
+                    value={userForm.role}
+                    onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}
+                  >
+                    <option value="normal_user">Normal User</option>
+                    <option value="admin">Admin</option>
+                    <option value="store_owner">Store Owner</option>
+                  </Form.Select>
+                </Form.Group>
+                {userForm.role === "store_owner" ? (
+                  <Form.Group controlId="userStoreId">
+                    <Form.Label>Assign Store</Form.Label>
+                    <Form.Select
+                      value={userForm.storeId}
+                      onChange={(event) => setUserForm({ ...userForm, storeId: event.target.value })}
+                    >
+                      <option value="">Choose a store</option>
+                      {stores.map((store) => (
+                        <option key={store.id} value={store.id}>
+                          {store.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                ) : null}
+                {userError ? <Alert variant="danger" className="mb-0">{userError}</Alert> : null}
+                <div>
+                  <Button type="submit" variant="dark">
+                    Create user
+                  </Button>
+                </div>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-      <div id="stores" className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <section id="stores" className="mb-4">
+        <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-3">
           <div>
-            <h2 className="app-title text-2xl font-bold text-slate-900">Stores</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Search by name, email, or address and sort by key fields.
-            </p>
+            <h2 className="app-title h3 fw-bold mb-1">Stores</h2>
+            <p className="text-secondary mb-0">Search by name, email, or address and sort by key fields.</p>
           </div>
-          <Field
-            label="Filter stores"
-            value={storeQuery}
-            onChange={(event) => setStoreQuery(event.target.value)}
-            placeholder="Search stores"
-            className="md:w-80"
-          />
+          <Form.Group className="mb-0" controlId="filterStores">
+            <Form.Label>Filter stores</Form.Label>
+            <Form.Control
+              value={storeQuery}
+              onChange={(event) => setStoreQuery(event.target.value)}
+              placeholder="Search stores"
+            />
+          </Form.Group>
         </div>
-        <SortableTable
+        <EntityTable
           title="Registered stores"
           columns={storeColumns}
           rows={filteredStores}
@@ -369,30 +411,33 @@ export default function AdminDashboard() {
             )
           }
           rowActions={(row) => (
-            <Button variant="soft" onClick={() => setActiveUser({ type: "store", item: row })}>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => setActiveUser({ type: "store", item: row })}
+            >
               View details
             </Button>
           )}
         />
-      </div>
+      </section>
 
-      <div id="users" className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <section id="users" className="mb-4">
+        <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-3">
           <div>
-            <h2 className="app-title text-2xl font-bold text-slate-900">Users</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Filter across name, email, address, and role.
-            </p>
+            <h2 className="app-title h3 fw-bold mb-1">Users</h2>
+            <p className="text-secondary mb-0">Filter across name, email, address, and role.</p>
           </div>
-          <Field
-            label="Filter users"
-            value={userQuery}
-            onChange={(event) => setUserQuery(event.target.value)}
-            placeholder="Search users"
-            className="md:w-80"
-          />
+          <Form.Group className="mb-0" controlId="filterUsers">
+            <Form.Label>Filter users</Form.Label>
+            <Form.Control
+              value={userQuery}
+              onChange={(event) => setUserQuery(event.target.value)}
+              placeholder="Search users"
+            />
+          </Form.Group>
         </div>
-        <SortableTable
+        <EntityTable
           title="All users"
           columns={userColumns}
           rows={filteredUsers}
@@ -405,100 +450,254 @@ export default function AdminDashboard() {
             )
           }
           rowActions={(row) => (
-            <Button variant="soft" onClick={() => setActiveUser({ type: "user", item: row })}>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => setActiveUser({ type: "user", item: row })}
+            >
               View details
             </Button>
           )}
         />
-      </div>
+      </section>
 
-      <Card>
-        <div className="app-title text-2xl font-bold text-slate-900">Admin password</div>
-        <p className="mt-2 text-sm text-slate-600">
-          The challenge includes password updates after login. This panel gives the same flow to
-          the admin account for completeness.
-        </p>
-        <form className="mt-5 grid gap-4 md:grid-cols-2" onSubmit={handlePasswordSubmit}>
-          <Field
-            label="New password"
-            type="password"
-            value={passwordForm.password}
-            onChange={(event) => setPasswordForm({ ...passwordForm, password: event.target.value })}
-            error={passwordForm.password ? validatePassword(passwordForm.password) : ""}
-          />
-          <Field
-            label="Confirm password"
-            type="password"
-            value={passwordForm.confirm}
-            onChange={(event) => setPasswordForm({ ...passwordForm, confirm: event.target.value })}
-          />
-          <div className="md:col-span-2">
-            {passwordError ? (
-              <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                {passwordError}
-              </div>
-            ) : null}
-            {passwordNotice ? (
-              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                {passwordNotice}
-              </div>
-            ) : null}
-          </div>
-          <div className="md:col-span-2">
-            <Button type="submit">Update admin password</Button>
-          </div>
-        </form>
+      <Card className="border-0 shadow-sm mb-4">
+        <Card.Body className="p-4">
+          <div className="app-title h3 fw-bold mb-2">Admin password</div>
+          <p className="text-secondary mb-4">
+            The challenge includes password updates after login. This panel gives the same flow to the admin account for completeness.
+          </p>
+          <Form onSubmit={handlePasswordSubmit} className="d-grid gap-3">
+            <Row className="g-3">
+              <Col xs={12} md={6}>
+                <Form.Group controlId="adminPassword">
+                  <Form.Label>New password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={passwordForm.password}
+                    onChange={(event) => setPasswordForm({ ...passwordForm, password: event.target.value })}
+                    isInvalid={Boolean(passwordForm.password && validatePassword(passwordForm.password))}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {validatePassword(passwordForm.password)}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+              <Col xs={12} md={6}>
+                <Form.Group controlId="adminPasswordConfirm">
+                  <Form.Label>Confirm password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={passwordForm.confirm}
+                    onChange={(event) => setPasswordForm({ ...passwordForm, confirm: event.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            {passwordError ? <Alert variant="danger" className="mb-0">{passwordError}</Alert> : null}
+            {passwordNotice ? <Alert variant="success" className="mb-0">{passwordNotice}</Alert> : null}
+            <div>
+              <Button type="submit" variant="dark">
+                Update admin password
+              </Button>
+            </div>
+          </Form>
+        </Card.Body>
       </Card>
 
-      {activeUser ? (
-        <Modal
-          title={activeUser.type === "user" ? "User details" : "Store details"}
-          onClose={() => setActiveUser(null)}
-        >
-          {activeUser.type === "user" ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Detail label="Name" value={activeUser.item.name} />
-              <Detail label="Email" value={activeUser.item.email} />
-              <Detail label="Address" value={activeUser.item.address} />
-              <Detail label="Role" value={formatRole(activeUser.item.role)} />
+      <Modal show={Boolean(activeUser)} onHide={() => setActiveUser(null)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{activeUser?.type === "user" ? "User details" : "Store details"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {activeUser?.type === "user" ? (
+            <Row className="g-3">
+              <DetailCol label="Name" value={activeUser.item.name} />
+              <DetailCol label="Email" value={activeUser.item.email} />
+              <DetailCol label="Address" value={activeUser.item.address} />
+              <DetailCol label="Role" value={formatRole(activeUser.item.role)} />
               {activeUser.item.role === "store_owner" ? (
-                <Detail
+                <DetailCol
                   label="Store Rating"
-                  value={formatRating(
-                    averageRating(ratings, activeUser.item.storeId || "")
-                  )}
+                  value={formatRating(averageRating(ratings, activeUser.item.storeId || ""))}
                 />
               ) : null}
-            </div>
+            </Row>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Detail label="Name" value={activeUser.item.name} />
-              <Detail label="Email" value={activeUser.item.email} />
-              <Detail label="Address" value={activeUser.item.address} />
-              <Detail
+            <Row className="g-3">
+              <DetailCol label="Name" value={activeUser?.item.name} />
+              <DetailCol label="Email" value={activeUser?.item.email} />
+              <DetailCol label="Address" value={activeUser?.item.address} />
+              <DetailCol
                 label="Overall Rating"
-                value={formatRating(averageRating(ratings, activeUser.item.id))}
+                value={formatRating(averageRating(ratings, activeUser?.item.id))}
               />
-              <Detail label="Rating Count" value={ratingCount(ratings, activeUser.item.id)} />
-              <Detail
+              <DetailCol label="Rating Count" value={ratingCount(ratings, activeUser?.item.id)} />
+              <DetailCol
                 label="Owner"
-                value={
-                  users.find((user) => user.id === activeUser.item.ownerId)?.name || "Unassigned"
-                }
+                value={users.find((user) => user.id === activeUser?.item.ownerId)?.name || "Unassigned"}
               />
-            </div>
+            </Row>
           )}
-        </Modal>
-      ) : null}
-    </PageShell>
+        </Modal.Body>
+      </Modal>
+    </DashboardShell>
   );
 }
 
-function Detail({ label, value }) {
+function DashboardShell({ currentUser, title, subtitle, navItems, onLogout, children }) {
   return (
-    <div className="rounded-2xl bg-slate-50 px-4 py-4">
-      <div className="text-xs uppercase tracking-[0.22em] text-slate-500">{label}</div>
-      <div className="mt-2 text-sm font-semibold text-slate-900">{value}</div>
+    <div className="min-vh-100">
+      <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
+        <Container fluid="xl">
+          <Navbar.Brand className="d-flex align-items-center gap-2 fw-semibold">
+            <span className="app-logo">SG</span>
+            <span>StoreGrid</span>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="dashboard-nav" />
+          <Navbar.Collapse id="dashboard-nav">
+            <Nav className="me-auto gap-1">
+              {navItems.map((item) => (
+                <Nav.Link key={item.label} as={Link} to={item.to} className="fw-semibold">
+                  {item.label}
+                </Nav.Link>
+              ))}
+            </Nav>
+            <div className="d-flex align-items-center gap-3 ms-lg-auto">
+              <div className="text-end small">
+                <div className="fw-semibold">{currentUser.name}</div>
+                <div className="text-white-50 text-capitalize">{formatRole(currentUser.role)}</div>
+              </div>
+              <Button variant="outline-light" size="sm" onClick={onLogout}>
+                Logout
+              </Button>
+            </div>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      <Container fluid="xl" className="py-4 py-lg-5">
+        <div className="mb-4 d-flex flex-column flex-lg-row justify-content-between gap-3">
+          <div>
+            <div className="text-uppercase small fw-semibold text-secondary" style={{ letterSpacing: "0.22em" }}>
+              Dashboard
+            </div>
+            <h1 className="app-title display-6 fw-bold mb-2">{title}</h1>
+            <p className="text-secondary mb-0">{subtitle}</p>
+          </div>
+          <div className="text-lg-end">
+            <div className="small text-secondary">Signed in as</div>
+            <div className="fw-semibold">{currentUser.email}</div>
+          </div>
+        </div>
+        {children}
+      </Container>
     </div>
+  );
+}
+
+function StatsGrid({ items }) {
+  return (
+    <Row className="g-3 mb-4">
+      {items.map((item) => (
+        <Col key={item.label} xs={12} md={6} xl={3}>
+          <Card className="h-100 border-0 shadow-sm">
+            <Card.Body>
+              <div className="text-uppercase small fw-semibold text-secondary" style={{ letterSpacing: "0.18em" }}>
+                {item.label}
+              </div>
+              <div className="mt-2 d-flex align-items-end justify-content-between gap-3">
+                <div className="app-title h2 mb-0 fw-bold">{item.value}</div>
+                <Badge bg="secondary" pill className="text-uppercase">
+                  {item.note}
+                </Badge>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+}
+
+function EntityTable({ title, columns, rows, sortConfig, onSort, rowActions }) {
+  return (
+    <Card className="border-0 shadow-sm">
+      <Card.Body className="p-0">
+        <div className="border-bottom px-4 py-3 d-flex align-items-center justify-content-between gap-3">
+          <div>
+            <div className="fw-semibold">{title}</div>
+            <div className="text-secondary small">{rows.length} records</div>
+          </div>
+        </div>
+        <div className="table-responsive">
+          <Table hover className="mb-0 align-middle">
+            <thead className="table-light">
+              <tr>
+                {columns.map((column) => (
+                  <th key={column.key} scope="col">
+                    {column.sortable ? (
+                      <Button
+                        variant="link"
+                        className="p-0 text-decoration-none fw-semibold text-dark"
+                        onClick={() => onSort(column.key)}
+                      >
+                        {column.label}{" "}
+                        {sortConfig.key === column.key ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                      </Button>
+                    ) : (
+                      column.label
+                    )}
+                  </th>
+                ))}
+                {rowActions ? <th className="text-end">Actions</th> : null}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length ? (
+                rows.map((row) => (
+                  <tr key={row.id}>
+                    {columns.map((column) => (
+                      <td key={column.key}>{column.render ? column.render(row) : row[column.key]}</td>
+                    ))}
+                    {rowActions ? <td className="text-end">{rowActions(row)}</td> : null}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length + (rowActions ? 1 : 0)} className="text-center text-secondary py-4">
+                    No records match the current filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function DetailCol({ label, value }) {
+  return (
+    <Col xs={12} sm={6}>
+      <div className="border rounded-3 bg-light p-3 h-100">
+        <div className="text-uppercase small text-secondary" style={{ letterSpacing: "0.18em" }}>
+          {label}
+        </div>
+        <div className="mt-2 fw-semibold">{value}</div>
+      </div>
+    </Col>
+  );
+}
+
+function RatingPill({ value }) {
+  const rating = Number(value || 0);
+  const variant = rating >= 4 ? "success" : rating >= 3 ? "warning" : rating > 0 ? "danger" : "secondary";
+
+  return (
+    <Badge bg={variant} text={variant === "warning" ? "dark" : undefined} pill className="px-3 py-2">
+      {formatRating(rating)}
+    </Badge>
   );
 }

@@ -1,3 +1,8 @@
+
+// why this AppContext file?
+// BEcasue 
+
+
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { seedRatings, seedStores, seedUsers } from "../data/seed";
 import { loadJson, saveJson } from "../utils/storage";
@@ -64,6 +69,7 @@ export function AppProvider({ children }) {
   const logout = () => setSessionUserId(null);
 
   const registerUser = ({ name, email, address, password }) => {
+    // check for validate errors
     const errors = [
       validateName(name),
       validateEmail(email),
@@ -74,6 +80,7 @@ export function AppProvider({ children }) {
     if (errors.length) {
       throw new Error(errors[0]);
     }
+// check if email already exists by calling to normalizeEmail function and check if it exists in users array
 
     const normalizedEmail = normalizeEmail(email);
     if (users.some((user) => normalizeEmail(user.email) === normalizedEmail)) {
@@ -85,10 +92,10 @@ export function AppProvider({ children }) {
       name: name.trim(),
       email: normalizedEmail,
       address: address.trim(),
-      password,
+      password,  //secured hash password
       role: "normal_user",
     };
-
+// this will update the users state by adding the new user to the existing arry users
     setUsers((current) => [...current, user]);
     return user;
   };
@@ -142,6 +149,7 @@ export function AppProvider({ children }) {
   };
 
   const addStore = ({ name, email, address, ownerId }) => {
+    // firstly validate the inputs using validate functions
     const errors = [
       validateStoreName(name),
       validateEmail(email),
@@ -152,6 +160,7 @@ export function AppProvider({ children }) {
       throw new Error(errors[0]);
     }
 
+    // check for duplicate store email
     const normalizedEmail = normalizeEmail(email);
     if (stores.some((store) => normalizeEmail(store.email) === normalizedEmail)) {
       throw new Error("This store email is already registered.");

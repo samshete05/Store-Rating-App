@@ -5,7 +5,7 @@ StoreMark is a full-stack store rating and feedback platform built with React, T
 The project includes:
 - A React frontend in the repo root
 - An Express backend in `backend/`
-- PostgreSQL schema and seed scripts in `backend/sql/`
+- PostgreSQL schema and dummy scripts in `backend/sql/`
 - `docker-compose.yml` for local database setup
 
 ## Requirements Covered

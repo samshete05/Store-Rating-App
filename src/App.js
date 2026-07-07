@@ -1,13 +1,27 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import { getHomePath } from "./pages/routeHelpers";
+
+function ProtectedRoute({ children, allowedRoles }) {
+  const { currentUser } = useApp();
+  const location = useLocation();
+
+  if (!currentUser) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+    return <Navigate to={getHomePath(currentUser.role)} replace />;
+  }
+
+  return children;
+}
 
 function AppRoutes() {
   const { currentUser } = useApp();
