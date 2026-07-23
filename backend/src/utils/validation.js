@@ -29,6 +29,14 @@ function validateEmail(email) {
   return "";
 }
 
+function validateRole(role) {
+  const allowedRoles = new Set(["admin", "normal_user", "store_owner"]);
+  if (!allowedRoles.has(role)) {
+    return "Select a valid user role.";
+  }
+  return "";
+}
+
 function validateStoreName(name) {
   const value = String(name || "").trim();
   if (value.length < 3) return "Store name must be at least 3 characters.";
@@ -55,6 +63,7 @@ module.exports = {
   validateAddress,
   validatePassword,
   validateEmail,
+  validateRole,
   validateStoreName,
   validateRating,
   validateFeedback,

@@ -1,6 +1,18 @@
 const jwt = require("jsonwebtoken");
 
+function ensureJwtSecret() {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured.");
+  }
+}
+
 function requireAuth(req, res, next) {
+  try {
+    ensureJwtSecret();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) {

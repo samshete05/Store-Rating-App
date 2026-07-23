@@ -113,7 +113,7 @@ export default function AdminDashboard() {
 
   const ownerOptions = users.filter((user) => user.role === "store_owner" || user.role === "normal_user");
 
-  const handleUserSubmit = (event) => {
+  const handleUserSubmit = async (event) => {
     event.preventDefault();
     setUserError("");
     setNotice("");
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
         throw new Error("Choose a store to assign to the store owner.");
       }
 
-      addUser(userForm);
+      await addUser(userForm);
       setUserForm(defaultUserForm);
       setNotice("User created successfully.");
     } catch (err) {
@@ -131,13 +131,13 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleStoreSubmit = (event) => {
+  const handleStoreSubmit = async (event) => {
     event.preventDefault();
     setStoreError("");
     setNotice("");
 
     try {
-      addStore(storeForm);
+      await addStore(storeForm);
       setStoreForm(defaultStoreForm);
       setNotice("Store created successfully.");
     } catch (err) {
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handlePasswordSubmit = (event) => {
+  const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     setPasswordError("");
     setPasswordNotice("");
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      updatePassword({ userId: currentUser.id, password: passwordForm.password });
+      await updatePassword({ userId: currentUser.id, password: passwordForm.password });
       setPasswordForm({ password: "", confirm: "" });
       setPasswordNotice("Password updated successfully.");
     } catch (err) {

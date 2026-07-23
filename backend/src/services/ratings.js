@@ -1,6 +1,22 @@
 const { pool } = require("../config/db");
 const { validateFeedback, validateRating } = require("../utils/validation");
 
+function publicRating(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    storeId: row.store_id,
+    rating: Number(row.rating),
+    feedback: row.feedback || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    userName: row.user_name || null,
+    userEmail: row.user_email || null,
+    storeName: row.store_name || null,
+  };
+}
+
 async function submitRating({ userId, storeId, rating, feedback = "" }) {
   const error = validateRating(rating);
   if (error) throw new Error(error);
@@ -18,7 +34,7 @@ async function submitRating({ userId, storeId, rating, feedback = "" }) {
      returning *`,
     [userId, storeId, Number(rating), normalizedFeedback]
   );
-  return result.rows[0];
+  return publicRating(result.rows[0]);
 }
 
 async function listRatingsForStoreIds(storeIds = []) {
@@ -43,7 +59,12 @@ async function listRatings() {
      join stores s on s.id = r.store_id
      order by r.updated_at desc`
   );
-  return result.rows;
+  return result.rows.map(publicRating);
 }
 
-module.exports = { submitRating, listRatingsForStoreIds, listRatings };
+async function listAllRatings() {
+  const result = await pool.query("select * from ratings order by updated_at desc");
+  return result.rows.map(publicRating);
+}
+
+module.exports = { submitRating, listRatingsForStoreIds, listRatings, listAllRatings, publicRating };

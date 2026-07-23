@@ -18,12 +18,12 @@ export default function Login() {
     }
   }, [currentUser, navigate]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const user = login(form);
+      const user = await login(form);
       const destination = location.state?.from?.pathname || getHomePath(user.role);
       navigate(destination, { replace: true });
     } catch (err) {

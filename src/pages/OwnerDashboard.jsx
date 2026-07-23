@@ -63,7 +63,7 @@ export default function OwnerDashboard() {
     [ownedStores, ratings, storeRatings.length]
   );
 
-  const handlePasswordSubmit = (event) => {
+  const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     setPasswordError("");
     setPasswordNotice("");
@@ -74,7 +74,7 @@ export default function OwnerDashboard() {
     }
 
     try {
-      updatePassword({ userId: currentUser.id, password: passwordForm.password });
+      await updatePassword({ userId: currentUser.id, password: passwordForm.password });
       setPasswordForm({ password: "", confirm: "" });
       setPasswordNotice("Password updated successfully.");
     } catch (err) {

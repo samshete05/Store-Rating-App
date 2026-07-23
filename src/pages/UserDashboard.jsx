@@ -37,7 +37,7 @@ export default function UserDashboard() {
     });
 
     setDraftReviews(nextDrafts);
-  }, [currentUser.id, ratings, stores, getSubmittedRating]);
+  }, [currentUser.id, ratings, stores]);
 
   const filteredStores = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -73,7 +73,7 @@ export default function UserDashboard() {
     [currentUser.id, filteredStores.length, getStoreAverage, ratings, stores]
   );
 
-  const handleSubmitRating = (storeId) => {
+  const handleSubmitRating = async (storeId) => {
     setError("");
     setNotice("");
 
@@ -92,14 +92,14 @@ export default function UserDashboard() {
     }
 
     try {
-      submitRating({ userId: currentUser.id, storeId, rating: Number(value), feedback });
+      await submitRating({ userId: currentUser.id, storeId, rating: Number(value), feedback });
       setNotice("Review saved.");
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handlePasswordSubmit = (event) => {
+  const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     setPasswordError("");
     setPasswordNotice("");
@@ -110,7 +110,7 @@ export default function UserDashboard() {
     }
 
     try {
-      updatePassword({ userId: currentUser.id, password: passwordForm.password });
+      await updatePassword({ userId: currentUser.id, password: passwordForm.password });
       setPasswordForm({ password: "", confirm: "" });
       setPasswordNotice("Password updated successfully.");
     } catch (err) {

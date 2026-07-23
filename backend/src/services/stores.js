@@ -1,6 +1,20 @@
 const { pool } = require("../config/db");
 const { validateAddress, validateEmail, validateStoreName } = require("../utils/validation");
 
+function publicStore(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    address: row.address,
+    ownerId: row.owner_id,
+    ownerName: row.owner_name || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 async function listStores(search = "") {
   const q = `%${String(search).trim().toLowerCase()}%`;
   const result = await pool.query(
@@ -20,24 +34,42 @@ async function createStore({ name, email, address, ownerId = null }) {
 
   const existing = await pool.query("select id from stores where lower(email) = lower($1) limit 1", [email]);
   if (existing.rows[0]) throw new Error("This store email is already registered.");
+  const client = await pool.connect();
 
-  const result = await pool.query(
-    `insert into stores (name, email, address, owner_id)
-     values ($1, $2, $3, $4)
-     returning *`,
-    [name.trim(), email.trim().toLowerCase(), address.trim(), ownerId]
-  );
+  try {
+    await client.query("begin");
 
-  if (ownerId) {
-    await pool.query(
-      `update users
-       set role = 'store_owner', store_id = $2, updated_at = now()
-       where id = $1`,
-      [ownerId, result.rows[0].id]
+    if (ownerId) {
+      const ownerCheck = await client.query("select id from users where id = $1 limit 1", [ownerId]);
+      if (!ownerCheck.rows[0]) {
+        throw new Error("Owner not found.");
+      }
+    }
+
+    const result = await client.query(
+      `insert into stores (name, email, address, owner_id)
+       values ($1, $2, $3, $4)
+       returning *`,
+      [name.trim(), email.trim().toLowerCase(), address.trim(), ownerId]
     );
-  }
 
-  return result.rows[0];
+    if (ownerId) {
+      await client.query(
+        `update users
+         set role = 'store_owner', store_id = $2, updated_at = now()
+         where id = $1`,
+        [ownerId, result.rows[0].id]
+      );
+    }
+
+    await client.query("commit");
+    return result.rows[0];
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 async function getStoreById(id) {
@@ -55,4 +87,5 @@ module.exports = {
   createStore,
   getStoreById,
   listOwnedStores,
+  publicStore,
 };

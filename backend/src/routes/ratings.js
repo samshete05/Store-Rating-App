@@ -1,7 +1,7 @@
 const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const { requireAuth, requireRoles } = require("../middleware/auth");
-const { submitRating } = require("../services/ratings");
+const { submitRating, listAllRatings } = require("../services/ratings");
 const { getStoreById, listOwnedStores } = require("../services/stores");
 const { pool } = require("../config/db");
 
@@ -17,6 +17,15 @@ router.post(
     if (!store) return res.status(404).json({ message: "Store not found." });
     const result = await submitRating({ userId: req.auth.sub, storeId, rating, feedback });
     res.status(201).json({ rating: result });
+  })
+);
+
+router.get(
+  "/",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const ratings = await listAllRatings();
+    res.json({ ratings });
   })
 );
 

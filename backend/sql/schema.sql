@@ -30,8 +30,7 @@ create table if not exists stores (
 );
 
 alter table users
-  add constraint fk_users_storeseed.sql
-  
+  add constraint fk_users_store
   foreign key (store_id) references stores(id) on delete set null;
 
 create table if not exists ratings (

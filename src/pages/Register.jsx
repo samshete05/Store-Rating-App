@@ -27,14 +27,14 @@ export default function Register() {
 
   // react hook submit handler 
   // error handle 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setSuccess("");
 
     try {
       // register the user using the registerUser function from context 
-      registerUser(form);
+      await registerUser(form);
       // set success message and reset form
       setSuccess("Registration completed. You can sign in now.");
       setForm(initialForm);

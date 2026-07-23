@@ -1,7 +1,7 @@
 const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const { requireAuth, requireRoles } = require("../middleware/auth");
-const { listStores } = require("../services/stores");
+const { listStores, createStore, publicStore } = require("../services/stores");
 const { pool } = require("../config/db");
 
 const router = express.Router();
@@ -35,6 +35,16 @@ router.get(
     );
 
     res.json({ stores: result });
+  })
+);
+
+router.post(
+  "/",
+  requireAuth,
+  requireRoles("admin"),
+  asyncHandler(async (req, res) => {
+    const store = await createStore(req.body);
+    res.status(201).json({ store: publicStore(store) });
   })
 );
 

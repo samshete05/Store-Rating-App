@@ -53,3 +53,4 @@ psql -h localhost -U postgres -d store_ratings -f backend/sql/seed.sql
  The React app is already built as CRA, not Vite.
  The backend is ready for JWT-based auth and PostgreSQL.
  The database scripts follow the challenge rules and constraints.
+ For local development, run the frontend and backend in separate terminals so the API and UI can both stay active.
