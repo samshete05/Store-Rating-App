@@ -3,11 +3,11 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
-const authRoutes = require("./routes/auth");
-const usersRoutes = require("./routes/users");
-const adminRoutes = require("./routes/admin");
-const storeRoutes = require("./routes/stores");
-const ratingRoutes = require("./routes/ratings");
+const authRoutes = require("./src/routes/auth");
+const usersRoutes = require("./src/routes/users");
+const adminRoutes = require("./src/routes/admin");
+const storeRoutes = require("./src/routes/stores");
+const ratingRoutes = require("./src/routes/ratings");
 
 const app = express();
 

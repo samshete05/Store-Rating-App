@@ -1,6 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Alert, Badge, Button, Card, Col, Container, Form, Modal, Nav, Navbar, Row, Table } from "react-bootstrap";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Container,Form,Modal,
+  Nav,
+  Navbar,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { useApp } from "../context/AppContext";
 import {
   averageRating,
@@ -34,7 +45,16 @@ const defaultStoreForm = {
 };
 
 export default function AdminDashboard() {
-  const { currentUser, users, stores, ratings, addUser, addStore, logout, updatePassword } = useApp();
+  const {
+    currentUser,
+    users,
+    stores,
+    ratings,
+    addUser,
+    addStore,
+    logout,
+    updatePassword,
+  } = useApp();
   const [userQuery, setUserQuery] = useState("");
   const [storeQuery, setStoreQuery] = useState("");
   const [userSort, setUserSort] = useState({ key: "name", direction: "asc" });
@@ -45,7 +65,10 @@ export default function AdminDashboard() {
   const [notice, setNotice] = useState("");
   const [userError, setUserError] = useState("");
   const [storeError, setStoreError] = useState("");
-  const [passwordForm, setPasswordForm] = useState({ password: "", confirm: "" });
+  const [passwordForm, setPasswordForm] = useState({
+    password: "",
+    confirm: "",
+  });
   const [passwordError, setPasswordError] = useState("");
   const [passwordNotice, setPasswordNotice] = useState("");
 
@@ -58,13 +81,16 @@ export default function AdminDashboard() {
         label: "Average Store Rating",
         value: formatRating(
           stores.length
-            ? stores.reduce((sum, store) => sum + averageRating(ratings, store.id), 0) / stores.length
-            : 0
+            ? stores.reduce(
+                (sum, store) => sum + averageRating(ratings, store.id),
+                0,
+              ) / stores.length
+            : 0,
         ),
         note: "Platform wide",
       },
     ],
-    [ratings, stores, users.length]
+    [ratings, stores, users.length],
   );
 
   const filteredUsers = useMemo(() => {
@@ -111,7 +137,9 @@ export default function AdminDashboard() {
     });
   }, [ratings, storeQuery, storeSort.direction, storeSort.key, stores, users]);
 
-  const ownerOptions = users.filter((user) => user.role === "store_owner" || user.role === "normal_user");
+  const ownerOptions = users.filter(
+    (user) => user.role === "store_owner" || user.role === "normal_user",
+  );
 
   const handleUserSubmit = async (event) => {
     event.preventDefault();
@@ -152,11 +180,14 @@ export default function AdminDashboard() {
 
     if (passwordForm.password !== passwordForm.confirm) {
       setPasswordError("Passwords do not match.");
-      return;  
+      return;
     }
 
     try {
-      await updatePassword({ userId: currentUser.id, password: passwordForm.password });
+      await updatePassword({
+        userId: currentUser.id,
+        password: passwordForm.password,
+      });
       setPasswordForm({ password: "", confirm: "" });
       setPasswordNotice("Password updated successfully.");
     } catch (err) {
@@ -168,16 +199,24 @@ export default function AdminDashboard() {
     { key: "name", label: "Name", sortable: true },
     { key: "email", label: "Email", sortable: true },
     { key: "address", label: "Address", sortable: true },
-    { key: "role", label: "Role", sortable: true, render: (row) => formatRole(row.role) },
+    {
+      key: "role",
+      label: "Role",
+      sortable: true,
+      render: (row) => formatRole(row.role),
+    },
     {
       key: "rating",
       label: "Rating",
       sortable: true,
       render: (row) => {
-        if (row.role !== "store_owner") return <span className="text-secondary">-</span>;
+        if (row.role !== "store_owner")
+          return <span className="text-secondary">-</span>;
 
         const store = stores.find((entry) => entry.id === row.storeId);
-        return <RatingPill value={store ? averageRating(ratings, store.id) : 0} />;
+        return (
+          <RatingPill value={store ? averageRating(ratings, store.id) : 0} />
+        );
       },
     },
   ];
@@ -224,15 +263,21 @@ export default function AdminDashboard() {
           <Card className="h-100 border-0 shadow-sm">
             <Card.Body className="p-4">
               <div className="app-title h3 fw-bold mb-2">Add a store</div>
-              <p className="text-secondary mb-4">Create a new store and assign to a store owner.</p>
+              <p className="text-secondary mb-4">
+                Create a new store and assign to a store owner.
+              </p>
               <Form onSubmit={handleStoreSubmit} className="d-grid gap-3">
                 <Form.Group controlId="storeName">
                   <Form.Label>Store Name</Form.Label>
                   <Form.Control
                     value={storeForm.name}
-                    onChange={(event) => setStoreForm({ ...storeForm, name: event.target.value })}
+                    onChange={(event) =>
+                      setStoreForm({ ...storeForm, name: event.target.value })
+                    }
                     placeholder="Northwind Groceries"
-                    isInvalid={Boolean(storeForm.name && validateStoreName(storeForm.name))}
+                    isInvalid={Boolean(
+                      storeForm.name && validateStoreName(storeForm.name),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateStoreName(storeForm.name)}
@@ -243,9 +288,13 @@ export default function AdminDashboard() {
                   <Form.Control
                     type="email"
                     value={storeForm.email}
-                    onChange={(event) => setStoreForm({ ...storeForm, email: event.target.value })}
+                    onChange={(event) =>
+                      setStoreForm({ ...storeForm, email: event.target.value })
+                    }
                     placeholder="store@example.com"
-                    isInvalid={Boolean(storeForm.email && validateEmail(storeForm.email))}
+                    isInvalid={Boolean(
+                      storeForm.email && validateEmail(storeForm.email),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateEmail(storeForm.email)}
@@ -255,9 +304,16 @@ export default function AdminDashboard() {
                   <Form.Label>Address</Form.Label>
                   <Form.Control
                     value={storeForm.address}
-                    onChange={(event) => setStoreForm({ ...storeForm, address: event.target.value })}
+                    onChange={(event) =>
+                      setStoreForm({
+                        ...storeForm,
+                        address: event.target.value,
+                      })
+                    }
                     placeholder="Full postal address"
-                    isInvalid={Boolean(storeForm.address && validateAddress(storeForm.address))}
+                    isInvalid={Boolean(
+                      storeForm.address && validateAddress(storeForm.address),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateAddress(storeForm.address)}
@@ -267,7 +323,12 @@ export default function AdminDashboard() {
                   <Form.Label>Owner</Form.Label>
                   <Form.Select
                     value={storeForm.ownerId}
-                    onChange={(event) => setStoreForm({ ...storeForm, ownerId: event.target.value })}
+                    onChange={(event) =>
+                      setStoreForm({
+                        ...storeForm,
+                        ownerId: event.target.value,
+                      })
+                    }
                   >
                     <option value="">Unassigned</option>
                     {ownerOptions.map((owner) => (
@@ -277,7 +338,11 @@ export default function AdminDashboard() {
                     ))}
                   </Form.Select>
                 </Form.Group>
-                {storeError ? <Alert variant="danger" className="mb-0">{storeError}</Alert> : null}
+                {storeError ? (
+                  <Alert variant="danger" className="mb-0">
+                    {storeError}
+                  </Alert>
+                ) : null}
                 <div>
                   <Button type="submit" variant="dark">
                     Create store
@@ -292,15 +357,21 @@ export default function AdminDashboard() {
           <Card className="h-100 border-0 shadow-sm">
             <Card.Body className="p-4">
               <div className="app-title h3 fw-bold mb-2">Add a user</div>
-              <p className="text-secondary mb-4">Create a normal user, admin user, or store owner from one form.</p>
+              <p className="text-secondary mb-4">
+                Create a normal user, admin user, or store owner from one form.
+              </p>
               <Form onSubmit={handleUserSubmit} className="d-grid gap-3">
                 <Form.Group controlId="userName">
                   <Form.Label>Name</Form.Label>
                   <Form.Control
                     value={userForm.name}
-                    onChange={(event) => setUserForm({ ...userForm, name: event.target.value })}
+                    onChange={(event) =>
+                      setUserForm({ ...userForm, name: event.target.value })
+                    }
                     placeholder="Cecilia Alexandra Bennett"
-                    isInvalid={Boolean(userForm.name && validateName(userForm.name))}
+                    isInvalid={Boolean(
+                      userForm.name && validateName(userForm.name),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateName(userForm.name)}
@@ -311,9 +382,13 @@ export default function AdminDashboard() {
                   <Form.Control
                     type="email"
                     value={userForm.email}
-                    onChange={(event) => setUserForm({ ...userForm, email: event.target.value })}
+                    onChange={(event) =>
+                      setUserForm({ ...userForm, email: event.target.value })
+                    }
                     placeholder="user@example.com"
-                    isInvalid={Boolean(userForm.email && validateEmail(userForm.email))}
+                    isInvalid={Boolean(
+                      userForm.email && validateEmail(userForm.email),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateEmail(userForm.email)}
@@ -323,9 +398,13 @@ export default function AdminDashboard() {
                   <Form.Label>Address</Form.Label>
                   <Form.Control
                     value={userForm.address}
-                    onChange={(event) => setUserForm({ ...userForm, address: event.target.value })}
+                    onChange={(event) =>
+                      setUserForm({ ...userForm, address: event.target.value })
+                    }
                     placeholder="Address"
-                    isInvalid={Boolean(userForm.address && validateAddress(userForm.address))}
+                    isInvalid={Boolean(
+                      userForm.address && validateAddress(userForm.address),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validateAddress(userForm.address)}
@@ -336,9 +415,13 @@ export default function AdminDashboard() {
                   <Form.Control
                     type="password"
                     value={userForm.password}
-                    onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
+                    onChange={(event) =>
+                      setUserForm({ ...userForm, password: event.target.value })
+                    }
                     placeholder="Admin@1234"
-                    isInvalid={Boolean(userForm.password && validatePassword(userForm.password))}
+                    isInvalid={Boolean(
+                      userForm.password && validatePassword(userForm.password),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validatePassword(userForm.password)}
@@ -348,7 +431,9 @@ export default function AdminDashboard() {
                   <Form.Label>Role</Form.Label>
                   <Form.Select
                     value={userForm.role}
-                    onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}
+                    onChange={(event) =>
+                      setUserForm({ ...userForm, role: event.target.value })
+                    }
                   >
                     <option value="normal_user">Normal User</option>
                     <option value="admin">Admin</option>
@@ -360,7 +445,12 @@ export default function AdminDashboard() {
                     <Form.Label>Assign Store</Form.Label>
                     <Form.Select
                       value={userForm.storeId}
-                      onChange={(event) => setUserForm({ ...userForm, storeId: event.target.value })}
+                      onChange={(event) =>
+                        setUserForm({
+                          ...userForm,
+                          storeId: event.target.value,
+                        })
+                      }
                     >
                       <option value="">Choose a store</option>
                       {stores.map((store) => (
@@ -371,7 +461,11 @@ export default function AdminDashboard() {
                     </Form.Select>
                   </Form.Group>
                 ) : null}
-                {userError ? <Alert variant="danger" className="mb-0">{userError}</Alert> : null}
+                {userError ? (
+                  <Alert variant="danger" className="mb-0">
+                    {userError}
+                  </Alert>
+                ) : null}
                 <div>
                   <Button type="submit" variant="dark">
                     Create user
@@ -387,7 +481,9 @@ export default function AdminDashboard() {
         <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-3">
           <div>
             <h2 className="app-title h3 fw-bold mb-1">Stores</h2>
-            <p className="text-secondary mb-0">Search by name, email, or address and sort by key fields.</p>
+            <p className="text-secondary mb-0">
+              Search by name, email, or address and sort by key fields.
+            </p>
           </div>
           <Form.Group className="mb-0" controlId="filterStores">
             <Form.Label>Filter stores</Form.Label>
@@ -406,8 +502,11 @@ export default function AdminDashboard() {
           onSort={(key) =>
             setStoreSort((current) =>
               current.key === key
-                ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
-                : { key, direction: "asc" }
+                ? {
+                    key,
+                    direction: current.direction === "asc" ? "desc" : "asc",
+                  }
+                : { key, direction: "asc" },
             )
           }
           rowActions={(row) => (
@@ -426,7 +525,9 @@ export default function AdminDashboard() {
         <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-3">
           <div>
             <h2 className="app-title h3 fw-bold mb-1">Users</h2>
-            <p className="text-secondary mb-0">Filter across name, email, address, and role.</p>
+            <p className="text-secondary mb-0">
+              Filter across name, email, address, and role.
+            </p>
           </div>
           <Form.Group className="mb-0" controlId="filterUsers">
             <Form.Label>Filter users</Form.Label>
@@ -445,8 +546,11 @@ export default function AdminDashboard() {
           onSort={(key) =>
             setUserSort((current) =>
               current.key === key
-                ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
-                : { key, direction: "asc" }
+                ? {
+                    key,
+                    direction: current.direction === "asc" ? "desc" : "asc",
+                  }
+                : { key, direction: "asc" },
             )
           }
           rowActions={(row) => (
@@ -465,7 +569,8 @@ export default function AdminDashboard() {
         <Card.Body className="p-4">
           <div className="app-title h3 fw-bold mb-2">Admin password</div>
           <p className="text-secondary mb-4">
-            The challenge includes password updates after login. This panel gives the same flow to the admin account for completeness.
+            The challenge includes password updates after login. This panel
+            gives the same flow to the admin account for completeness.
           </p>
           <Form onSubmit={handlePasswordSubmit} className="d-grid gap-3">
             <Row className="g-3">
@@ -475,8 +580,16 @@ export default function AdminDashboard() {
                   <Form.Control
                     type="password"
                     value={passwordForm.password}
-                    onChange={(event) => setPasswordForm({ ...passwordForm, password: event.target.value })}
-                    isInvalid={Boolean(passwordForm.password && validatePassword(passwordForm.password))}
+                    onChange={(event) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        password: event.target.value,
+                      })
+                    }
+                    isInvalid={Boolean(
+                      passwordForm.password &&
+                      validatePassword(passwordForm.password),
+                    )}
                   />
                   <Form.Control.Feedback type="invalid">
                     {validatePassword(passwordForm.password)}
@@ -489,13 +602,26 @@ export default function AdminDashboard() {
                   <Form.Control
                     type="password"
                     value={passwordForm.confirm}
-                    onChange={(event) => setPasswordForm({ ...passwordForm, confirm: event.target.value })}
+                    onChange={(event) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        confirm: event.target.value,
+                      })
+                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
-            {passwordError ? <Alert variant="danger" className="mb-0">{passwordError}</Alert> : null}
-            {passwordNotice ? <Alert variant="success" className="mb-0">{passwordNotice}</Alert> : null}
+            {passwordError ? (
+              <Alert variant="danger" className="mb-0">
+                {passwordError}
+              </Alert>
+            ) : null}
+            {passwordNotice ? (
+              <Alert variant="success" className="mb-0">
+                {passwordNotice}
+              </Alert>
+            ) : null}
             <div>
               <Button type="submit" variant="dark">
                 Update admin password
@@ -505,9 +631,16 @@ export default function AdminDashboard() {
         </Card.Body>
       </Card>
 
-      <Modal show={Boolean(activeUser)} onHide={() => setActiveUser(null)} centered size="lg">
+      <Modal
+        show={Boolean(activeUser)}
+        onHide={() => setActiveUser(null)}
+        centered
+        size="lg"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>{activeUser?.type === "user" ? "User details" : "Store details"}</Modal.Title>
+          <Modal.Title>
+            {activeUser?.type === "user" ? "User details" : "Store details"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {activeUser?.type === "user" ? (
@@ -515,11 +648,16 @@ export default function AdminDashboard() {
               <DetailCol label="Name" value={activeUser.item.name} />
               <DetailCol label="Email" value={activeUser.item.email} />
               <DetailCol label="Address" value={activeUser.item.address} />
-              <DetailCol label="Role" value={formatRole(activeUser.item.role)} />
+              <DetailCol
+                label="Role"
+                value={formatRole(activeUser.item.role)}
+              />
               {activeUser.item.role === "store_owner" ? (
                 <DetailCol
                   label="Store Rating"
-                  value={formatRating(averageRating(ratings, activeUser.item.storeId || ""))}
+                  value={formatRating(
+                    averageRating(ratings, activeUser.item.storeId || ""),
+                  )}
                 />
               ) : null}
             </Row>
@@ -530,12 +668,20 @@ export default function AdminDashboard() {
               <DetailCol label="Address" value={activeUser?.item.address} />
               <DetailCol
                 label="Overall Rating"
-                value={formatRating(averageRating(ratings, activeUser?.item.id))}
+                value={formatRating(
+                  averageRating(ratings, activeUser?.item.id),
+                )}
               />
-              <DetailCol label="Rating Count" value={ratingCount(ratings, activeUser?.item.id)} />
+              <DetailCol
+                label="Rating Count"
+                value={ratingCount(ratings, activeUser?.item.id)}
+              />
               <DetailCol
                 label="Owner"
-                value={users.find((user) => user.id === activeUser?.item.ownerId)?.name || "Unassigned"}
+                value={
+                  users.find((user) => user.id === activeUser?.item.ownerId)
+                    ?.name || "Unassigned"
+                }
               />
             </Row>
           )}
@@ -545,7 +691,14 @@ export default function AdminDashboard() {
   );
 }
 
-function DashboardShell({ currentUser, title, subtitle, navItems, onLogout, children }) {
+function DashboardShell({
+  currentUser,
+  title,
+  subtitle,
+  navItems,
+  onLogout,
+  children,
+}) {
   return (
     <div className="min-vh-100">
       <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
@@ -558,7 +711,12 @@ function DashboardShell({ currentUser, title, subtitle, navItems, onLogout, chil
           <Navbar.Collapse id="dashboard-nav">
             <Nav className="me-auto gap-1">
               {navItems.map((item) => (
-                <Nav.Link key={item.label} as={Link} to={item.to} className="fw-semibold">
+                <Nav.Link
+                  key={item.label}
+                  as={Link}
+                  to={item.to}
+                  className="fw-semibold"
+                >
                   {item.label}
                 </Nav.Link>
               ))}
@@ -566,7 +724,9 @@ function DashboardShell({ currentUser, title, subtitle, navItems, onLogout, chil
             <div className="d-flex align-items-center gap-3 ms-lg-auto">
               <div className="text-end small">
                 <div className="fw-semibold">{currentUser.name}</div>
-                <div className="text-white-50 text-capitalize">{formatRole(currentUser.role)}</div>
+                <div className="text-white-50 text-capitalize">
+                  {formatRole(currentUser.role)}
+                </div>
               </div>
               <Button variant="outline-light" size="sm" onClick={onLogout}>
                 Logout
@@ -579,7 +739,10 @@ function DashboardShell({ currentUser, title, subtitle, navItems, onLogout, chil
       <Container fluid="xl" className="py-4 py-lg-5">
         <div className="mb-4 d-flex flex-column flex-lg-row justify-content-between gap-3">
           <div>
-            <div className="text-uppercase small fw-semibold text-secondary" style={{ letterSpacing: "0.22em" }}>
+            <div
+              className="text-uppercase small fw-semibold text-secondary"
+              style={{ letterSpacing: "0.22em" }}
+            >
               Dashboard
             </div>
             <h1 className="app-title display-6 fw-bold mb-2">{title}</h1>
@@ -603,7 +766,10 @@ function StatsGrid({ items }) {
         <Col key={item.label} xs={12} md={6} xl={3}>
           <Card className="h-100 border-0 shadow-sm">
             <Card.Body>
-              <div className="text-uppercase small fw-semibold text-secondary" style={{ letterSpacing: "0.18em" }}>
+              <div
+                className="text-uppercase small fw-semibold text-secondary"
+                style={{ letterSpacing: "0.18em" }}
+              >
                 {item.label}
               </div>
               <div className="mt-2 d-flex align-items-end justify-content-between gap-3">
@@ -643,7 +809,11 @@ function EntityTable({ title, columns, rows, sortConfig, onSort, rowActions }) {
                         onClick={() => onSort(column.key)}
                       >
                         {column.label}{" "}
-                        {sortConfig.key === column.key ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                        {sortConfig.key === column.key
+                          ? sortConfig.direction === "asc"
+                            ? "▲"
+                            : "▼"
+                          : ""}
                       </Button>
                     ) : (
                       column.label
@@ -658,14 +828,21 @@ function EntityTable({ title, columns, rows, sortConfig, onSort, rowActions }) {
                 rows.map((row) => (
                   <tr key={row.id}>
                     {columns.map((column) => (
-                      <td key={column.key}>{column.render ? column.render(row) : row[column.key]}</td>
+                      <td key={column.key}>
+                        {column.render ? column.render(row) : row[column.key]}
+                      </td>
                     ))}
-                    {rowActions ? <td className="text-end">{rowActions(row)}</td> : null}
+                    {rowActions ? (
+                      <td className="text-end">{rowActions(row)}</td>
+                    ) : null}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns.length + (rowActions ? 1 : 0)} className="text-center text-secondary py-4">
+                  <td
+                    colSpan={columns.length + (rowActions ? 1 : 0)}
+                    className="text-center text-secondary py-4"
+                  >
                     No records match the current filter.
                   </td>
                 </tr>
@@ -682,7 +859,10 @@ function DetailCol({ label, value }) {
   return (
     <Col xs={12} sm={6}>
       <div className="border rounded-3 bg-light p-3 h-100">
-        <div className="text-uppercase small text-secondary" style={{ letterSpacing: "0.18em" }}>
+        <div
+          className="text-uppercase small text-secondary"
+          style={{ letterSpacing: "0.18em" }}
+        >
           {label}
         </div>
         <div className="mt-2 fw-semibold">{value}</div>
@@ -693,10 +873,22 @@ function DetailCol({ label, value }) {
 
 function RatingPill({ value }) {
   const rating = Number(value || 0);
-  const variant = rating >= 4 ? "success" : rating >= 3 ? "warning" : rating > 0 ? "danger" : "secondary";
+  const variant =
+    rating >= 4
+      ? "success"
+      : rating >= 3
+        ? "warning"
+        : rating > 0
+          ? "danger"
+          : "secondary";
 
   return (
-    <Badge bg={variant} text={variant === "warning" ? "dark" : undefined} pill className="px-3 py-2">
+    <Badge
+      bg={variant}
+      text={variant === "warning" ? "dark" : undefined}
+      pill
+      className="px-3 py-2"
+    >
       {formatRating(rating)}
     </Badge>
   );

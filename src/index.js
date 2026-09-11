@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter> {/* enable browser routing  ..beoz of multiple url paths /* /* */}
       <App />
     </BrowserRouter>
   </React.StrictMode>
