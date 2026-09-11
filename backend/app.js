@@ -11,7 +11,7 @@ const ratingRoutes = require("./src/routes/ratings");
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGINS || "https://store-rating-app-teal.vercel.app,http://localhost:3000")
+const allowedOrigins = (process.env.CORS_ORIGINS || "https://store-rating-app-teal.vercel.app")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);

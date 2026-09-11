@@ -12,8 +12,7 @@ import {
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL ||
-  process.env.REACT_API_URL ||
-  "http://localhost:4000";
+  "https://store-rating-app-1-yhnj.onrender.com";
 
 const AppContext = createContext(null);
 
