@@ -11,8 +11,16 @@ const ratingRoutes = require("./src/routes/ratings");
 
 const app = express();
 
+const allowedOrigins = (process.env.CORS_ORIGINS || "https://store-rating-app-teal.vercel.app,http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(helmet());
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (req, res) => res.json({ ok: true }));

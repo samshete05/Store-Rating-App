@@ -2,10 +2,10 @@
   "name": "store-rating-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
