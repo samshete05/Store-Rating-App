@@ -49,6 +49,10 @@ psql -h localhost -U postgres -d store_ratings -f backend/sql/seed.sql
 - Store owner: `owner@storegrid.com` / `Owner@1234`
 - Normal user: `user@storegrid.com` / `User@1234`
 
+
+## Live Link - 
+https://store-rating-app-git-main-samshete05s-projects.vercel.app/
+
 ## Notes
  The React app is already built as CRA, not Vite.
  The backend is ready for JWT-based auth and PostgreSQL.
